@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web OPAC - Late Sow Sheshabai Sitaram Mundhe Arts College</title>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <style>
+        body { font-family: 'Arial', sans-serif; background-color: #f4f7f6; padding: 20px; }
+        .header { text-align: center; background: #1a73e8; color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        .container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body>
+<div class="header">
+    <h2>Late Sow Sheshabai Sitaram Mundhe Arts College, Gangakhed</h2>
+    <h3>ग्रंथालय शोध प्रणाली (Web OPAC)</h3>
+</div>
+<div class="container">
+    <table id="opacTable" class="display" style="width:100%">
+        <thead>
+            <tr>
+                <th>Acc. No.</th>
+                <th>पुस्तकाचे नाव (Title)</th>
+                <th>लेखक (Author)</th>
+                <th>विषय (Subject)</th>
+                <th>उपलब्धता</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script>
+    $(document).ready(function() {
+        Papa.parse('books.csv', {
+            download: true,
+            header: true,
+            complete: function(results) {
+                let tableData = "";
+                results.data.forEach(row => {
+                    if(row['Accession No.']) {
+                        tableData += `<tr>
+                            <td>${row['Accession No.']}</td>
+                            <td>${row['Title']}</td>
+                            <td>${row['Author 1']}</td>
+                            <td>${row['Subject']}</td>
+                            <td>${row['Availability Message'] || 'संपर्क साधा'}</td>
+                        </tr>`;
+                    }
+                });
+                $('#opacTable tbody').html(tableData);
+                $('#opacTable').DataTable({
+                    "pageLength": 15,
+                    "language": {
+                        "search": "पुस्तके शोधा:",
+                        "paginate": { "next": "पुढील", "previous": "मागील" }
+                    }
+                });
+            }
+        });
+    });
+</script>
+</body>
+</html>
