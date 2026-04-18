@@ -3,19 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web OPAC - Late Sow Sheshabai Sitaram Mundhe Arts College</title>
+    <title>Advanced Web OPAC - Late Sow Sheshabai Sitaram Mundhe Arts College</title>
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
     <style>
-        body { font-family: 'Arial', sans-serif; background-color: #f4f7f6; padding: 20px; }
-        .header { text-align: center; background: #1a73e8; color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
-        .container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        body { font-family: 'Arial', sans-serif; background-color: #f0f2f5; padding: 20px; color: #333; }
+        .header { text-align: center; background: #004a99; color: white; padding: 25px; border-radius: 10px; margin-bottom: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .container { background: white; padding: 25px; border-radius: 10px; box-shadow: 0 2px 15px rgba(0,0,0,0.1); overflow-x: auto; }
+        tfoot { display: table-header-group; }
+        tfoot input { width: 100%; padding: 8px; box-sizing: border-box; border: 2px solid #ddd; border-radius: 5px; font-size: 14px; }
+        tfoot input:focus { border-color: #004a99; outline: none; }
+        table.dataTable thead th { background-color: #f8f9fa; color: #004a99; border-bottom: 2px solid #004a99; }
     </style>
 </head>
 <body>
+
 <div class="header">
     <h2>Late Sow Sheshabai Sitaram Mundhe Arts College, Gangakhed</h2>
-    <h3>ग्रंथालय शोध प्रणाली (Web OPAC)</h3>
+    <h3>प्रगत ग्रंथ शोध प्रणाली (Advanced Search OPAC)</h3>
 </div>
+
 <div class="container">
     <table id="opacTable" class="display" style="width:100%">
         <thead>
@@ -24,40 +30,65 @@
                 <th>पुस्तकाचे नाव (Title)</th>
                 <th>लेखक (Author)</th>
                 <th>विषय (Subject)</th>
-                <th>उपलब्धता</th>
+                <th>Class No. (DDC)</th>
             </tr>
         </thead>
+        <tfoot>
+            <tr>
+                <th><input type="text" placeholder="Acc. No."></th>
+                <th><input type="text" placeholder="पुस्तकाचे नाव..."></th>
+                <th><input type="text" placeholder="लेखक..."></th>
+                <th><input type="text" placeholder="विषय..."></th>
+                <th><input type="text" placeholder="DDC No."></th>
+            </tr>
+        </tfoot>
         <tbody></tbody>
     </table>
 </div>
+
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
 <script>
     $(document).ready(function() {
         Papa.parse('books.csv', {
             download: true,
             header: true,
+            skipEmptyLines: true,
             complete: function(results) {
                 let tableData = "";
                 results.data.forEach(row => {
                     if(row['Accession No.']) {
                         tableData += `<tr>
-                            <td>${row['Accession No.']}</td>
-                            <td>${row['Title']}</td>
-                            <td>${row['Author 1']}</td>
-                            <td>${row['Subject']}</td>
-                            <td>${row['Availability Message'] || 'संपर्क साधा'}</td>
+                            <td>${row['Accession No.'] || ''}</td>
+                            <td>${row['Title'] || ''}</td>
+                            <td>${row['Author 1'] || ''}</td>
+                            <td>${row['Subject'] || ''}</td>
+                            <td>${row['Class No. '] || ''}</td>
                         </tr>`;
                     }
                 });
                 $('#opacTable tbody').html(tableData);
-                $('#opacTable').DataTable({
-                    "pageLength": 15,
+
+                var table = $('#opacTable').DataTable({
+                    "pageLength": 20,
+                    "orderCellsTop": true,
                     "language": {
-                        "search": "पुस्तके शोधा:",
+                        "search": "एकत्रित शोध:",
+                        "lengthMenu": "_MENU_ प्रती दाखवा",
+                        "info": "एकूण _TOTAL_ पुस्तकांपैकी _START_ ते _END_ दाखवत आहे",
                         "paginate": { "next": "पुढील", "previous": "मागील" }
                     }
+                });
+
+                table.columns().every(function (i) {
+                    var that = this;
+                    $('input', table.column(i).footer()).on('keyup change', function () {
+                        if (that.search() !== this.value) {
+                            that.search(this.value).draw();
+                        }
+                    });
                 });
             }
         });
